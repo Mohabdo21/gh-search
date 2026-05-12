@@ -15,14 +15,14 @@ go install ./cmd/gh-search
 ## Usage
 
 ```bash
-gh-search <repo-url> --query <keywords> [--state open|closed|all] [--type issue|discussion|all] [--limit N] [--sort relevance|created|created-asc|created-desc|updated|updated-asc|updated-desc] [--json] [--plain-links]
+gh-search <repo-url> (--query|-q) <keywords> [(--state|-s) open|closed|all] [(--type|-t) issue|discussion|all] [--limit N] [--sort relevance|created|created-asc|created-desc|updated|updated-asc|updated-desc] [--json] [--plain-links]
 ```
 
 ## Flags
 
-- `--query`: required.
-- `--state`: filter by state. Default: `all`.
-- `--type`: search `issue`, `discussion`, or `all`. Default: `all`.
+- `--query`, `-q`: required.
+- `--state`, `-s`: filter by state. Default: `all`.
+- `--type`, `-t`: search `issue`, `discussion`, or `all`. Default: `all`.
 - `--limit`: max results per selected result type. `0` means no client-side cap.
 - `--sort`: `relevance`, `created`, `created-asc`, `created-desc`, `updated`, `updated-asc`, or `updated-desc`.
 - `--json`: print JSON.
@@ -32,6 +32,7 @@ gh-search <repo-url> --query <keywords> [--state open|closed|all] [--type issue|
 
 ```bash
 gh-search https://github.com/moby/moby --query "container exit code" --state all
+gh-search https://github.com/kubernetes/kubernetes -q "pod pending" -t discussion
 gh-search https://github.com/kubernetes/kubernetes --query "pod pending" --type discussion
 gh-search https://github.com/cli/cli --query "extension" --type issue --limit 5 --sort created-asc
 gh-search https://github.com/cli/go-gh --query "graphql client" --json --type issue --limit 3
@@ -43,7 +44,7 @@ gh-search https://github.com/hyprwm/Hyprland --query "GPU Reset" --state open --
 - Issues and discussions are queried separately.
 - `--limit` applies per selected result type.
 - Pagination is automatic.
+- Short flags exist only for the common filters: `-q`, `-s`, and `-t`.
 - Table output uses terminal hyperlinks when possible.
 - Piped output falls back to plain URLs.
 - GitHub search limits still apply.
-
