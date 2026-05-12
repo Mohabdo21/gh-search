@@ -324,8 +324,7 @@ func normalizeDiscussionState(closed, answered bool) string {
 }
 
 func wrapAPIError(err error) error {
-	var httpErr *api.HTTPError
-	if errors.As(err, &httpErr) {
+	if httpErr, ok := errors.AsType[*api.HTTPError](err); ok {
 		if isRateLimit(httpErr.StatusCode, httpErr.Message, httpErr.Headers) {
 			return fmt.Errorf("GitHub API rate limit exceeded%s", rateLimitResetSuffix(httpErr.Headers))
 		}
@@ -344,16 +343,14 @@ func wrapAPIError(err error) error {
 		}
 	}
 
-	var gqlErr *api.GraphQLError
-	if errors.As(err, &gqlErr) {
+	if gqlErr, ok := errors.AsType[*api.GraphQLError](err); ok {
 		if strings.Contains(strings.ToLower(gqlErr.Error()), "rate limit") {
 			return errors.New("GitHub GraphQL rate limit exceeded")
 		}
 		return fmt.Errorf("GitHub GraphQL error: %w", gqlErr)
 	}
 
-	var netErr net.Error
-	if errors.As(err, &netErr) {
+	if netErr, ok := errors.AsType[net.Error](err); ok {
 		if netErr.Timeout() {
 			return fmt.Errorf("network timeout while contacting GitHub: %w", err)
 		}
