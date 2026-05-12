@@ -98,8 +98,10 @@ func Run(ctx context.Context, args []string, stdout, stderr io.Writer) error {
 	}
 
 	return render.Write(stdout, result, render.Options{
-		JSON:       conf.JSON,
-		Hyperlinks: !conf.JSON && !conf.PlainLinks && supportsHyperlinks(stdout),
+		JSON:            conf.JSON,
+		Hyperlinks:      !conf.JSON && !conf.PlainLinks && supportsHyperlinks(stdout),
+		ShowIssues:      conf.Type == typeAll || conf.Type == typeIssue,
+		ShowDiscussions: conf.Type == typeAll || conf.Type == typeDiscussion,
 	})
 }
 

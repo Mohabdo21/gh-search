@@ -22,8 +22,10 @@ type Result struct {
 }
 
 type Options struct {
-	JSON       bool
-	Hyperlinks bool
+	JSON            bool
+	Hyperlinks      bool
+	ShowIssues      bool
+	ShowDiscussions bool
 }
 
 func Write(w io.Writer, result Result, opts Options) error {
@@ -37,22 +39,43 @@ func Write(w io.Writer, result Result, opts Options) error {
 		return err
 	}
 
-	if err := writeIssueSection(w, result.Issues, opts.Hyperlinks); err != nil {
-		return err
+	showIssues, showDiscussions := visibleSections(opts)
+	sectionsWritten := 0
+
+	if showIssues {
+		if err := writeIssueSection(w, result.Issues, opts.Hyperlinks); err != nil {
+			return err
+		}
+		sectionsWritten++
 	}
-	if _, err := fmt.Fprintln(w); err != nil {
-		return err
-	}
-	if err := writeDiscussionSection(w, result.Discussions, opts.Hyperlinks); err != nil {
-		return err
+	if showDiscussions {
+		if sectionsWritten > 0 {
+			if _, err := fmt.Fprintln(w); err != nil {
+				return err
+			}
+		}
+		if err := writeDiscussionSection(w, result.Discussions, opts.Hyperlinks); err != nil {
+			return err
+		}
+		sectionsWritten++
 	}
 	if opts.Hyperlinks {
 		return nil
 	}
-	if _, err := fmt.Fprintln(w); err != nil {
-		return err
+	if sectionsWritten > 0 {
+		if _, err := fmt.Fprintln(w); err != nil {
+			return err
+		}
 	}
 	return writeLinks(w, result)
+}
+
+func visibleSections(opts Options) (bool, bool) {
+	if !opts.ShowIssues && !opts.ShowDiscussions {
+		return true, true
+	}
+
+	return opts.ShowIssues, opts.ShowDiscussions
 }
 
 func writeIssueSection(w io.Writer, issues []githubsearch.IssueResult, hyperlinks bool) error {
